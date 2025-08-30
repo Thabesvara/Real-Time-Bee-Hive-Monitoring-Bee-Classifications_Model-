@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bee Hive Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+        }
+        .graph-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        canvas {
+            width: 400px;
+            height: 300px;
+        }
+        h2 {
+            color: #ffff00;
+        }
+        .data {
+            text-align: center;
+            padding: 10px;
+        }
+        .data p {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bee Hive Real-Time Monitoring</h1>
+            <p>Live Data from Sensors</p>
+        </div>
+        
+        <div class="data">
+            <h2>Current Sensor Values</h2>
+            <p>Temperature Outside: <span id="temp-out">Loading...</span> °C</p>
+            <p>Humidity Outside: <span id="hum-out">Loading...</span> %</p>
+            <p>Temperature Inside: <span id="temp-in">Loading...</span> °C</p>
+            <p>Sound Level: <span id="sound">Loading...</span> dB</p>
+            <p>Weight: <span id="weight">Loading...</span> kg</p>
+        </div>
+        
+        <div class="graph-container">
+            <canvas id="tempOutChart"></canvas>
+            <canvas id="tempInChart"></canvas>
+        </div>
+
+        <div class="graph-container">
+            <canvas id="humOutChart"></canvas>
+            <canvas id="soundChart"></canvas>
+        </div>
+
+        <div class="graph-container">
+            <canvas id="weightChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const tempOutData = [];
+        const humOutData = [];
+        const tempInData = [];
+        const soundData = [];
+        const weightData = [];
+
+        const tempOutChart = new Chart(document.getElementById('tempOutChart'), {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 10 }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Temperature Outside (°C)',
+                    data: tempOutData,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { min: 30, max: 40 }
+                }
+            }
+        });
+
+        const tempInChart = new Chart(document.getElementById('tempInChart'), {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 10 }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Temperature Inside (°C)',
+                    data: tempInData,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { min: 30, max: 40 }
+                }
+            }
+        });
+
+        const humOutChart = new Chart(document.getElementById('humOutChart'), {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 10 }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Humidity Outside (%)',
+                    data: humOutData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { min: 40, max: 80 }
+                }
+            }
+        });
+
+        const soundChart = new Chart(document.getElementById('soundChart'), {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 10 }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Sound Level (dB)',
+                    data: soundData,
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { min: 0, max: 100 }
+                }
+            }
+        });
+
+        const weightChart = new Chart(document.getElementById('weightChart'), {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 10 }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Weight (kg)',
+                    data: weightData,
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { beginAtZero: true },
+                    y: { min: 0, max: 5 }
+                }
+            }
+        });
+
+        const eventSource = new EventSource('/events');
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            document.getElementById('temp-out').innerText = data.dhtTemp;
+            document.getElementById('hum-out').innerText = data.dhtHumidity;
+            document.getElementById('temp-in').innerText = data.dsTemp;
+            document.getElementById('sound').innerText = data.sound;
+            document.getElementById('weight').innerText = data.weight;
+
+            tempOutData.push(data.dhtTemp);
+            humOutData.push(data.dhtHumidity);
+            tempInData.push(data.dsTemp);
+            soundData.push(data.sound);
+            weightData.push(data.weight);
+
+            if (tempOutData.length > 10) tempOutData.shift();
+            if (humOutData.length > 10) humOutData.shift();
+            if (tempInData.length > 10) tempInData.shift();
+            if (soundData.length > 10) soundData.shift();
+            if (weightData.length > 10) weightData.shift();
+
+            tempOutChart.update();
+            tempInChart.update();
+            humOutChart.update();
+            soundChart.update();
+            weightChart.update();
+        }
+    </script>
+</body>
+</html>
+

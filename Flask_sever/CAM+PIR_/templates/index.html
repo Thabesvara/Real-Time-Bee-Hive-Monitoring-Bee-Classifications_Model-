@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bee Detection - Homepage</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 1000px;
+            margin: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        h1, h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #cccccc;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #1E90FF;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Bee Detection - Latest Capture</h1>
+
+        {% if latest_image %}
+            <img src="{{ url_for('uploaded_file', filename=latest_image) }}" alt="Latest Image">
+        {% else %}
+            <p>No image captured yet.</p>
+        {% endif %}
+
+        <h3>Detection Result: {{ detection_result }}</h3>
+        <p>Types of Bees: {{ bee_types }}</p>
+        <p>Number of Bees: {{ bee_count }}</p>
+
+        <a href="{{ url_for('gallery') }}" class="btn">View Gallery</a>
+    </div>
+
+</body>
+</html>
+
